@@ -211,8 +211,8 @@ def main():
   global datalog
   global barometer
 
-  #bluetooth_adr = sys.argv[1] # this line to be uncommented if need to run from command prompt and there are several Sensor-Tags.
-  bluetooth_adr = "98:07:2D:28:0A:02" # if you have only one Sensor-Tag then easier this way. Hardcode your Sensor-Tag MAC address here. 
+  bluetooth_adr = sys.argv[1] # this line to be uncommented if need to run from command prompt and there are several Sensor-Tags.
+  #bluetooth_adr = "98:07:2D:28:0A:02" # if you have only one Sensor-Tag then easier this way. Hardcode your Sensor-Tag MAC address here. 
   print "INFO: [re]starting.."
   tag  = SensorTag(bluetooth_adr) #pass the Bluetooth Address
   counter = 0  
@@ -233,12 +233,12 @@ def main():
   time.sleep(0.5)
   
   flag_print_selection = dict(
-    pressure= 'False',
-    humidity= 'False',
-    lightIntensity= 'False',
-    gyroscope= 'False',
-    acceleration= 'False',
-    magnetometer= 'False'
+    pressure= 'True',
+    humidity= 'True',
+    lightIntensity= 'True',
+    gyroscope= 'True',
+    acceleration= 'True',
+    magnetometer= 'True'
     )
 
   flag_toDB_selection = dict(
@@ -274,98 +274,105 @@ def main():
 
     """GETTING THE LUMINANCE"""
     lux_luminance = hexLum2Lux(tag.char_read_hnd(0x44, "luminance"))
+    timestamp = int(time.time())
+    data_str = ("{}, {}\n".format(timestamp, lux_luminance))
+    print data_str
+    with open('luminance.txt', 'a') as f:
+        f.write(data_str)
+    #print timestamp, lux_luminance
+    time.sleep(5)
     
-    if flag_print_selection['lightIntensity'] == 'True':
-      print 'lux_luminance: ',lux_luminance
-    
-    if flag_toDB_selection['lightIntensity'] == 'True':
-      send_to_DB(lux_luminance, "luminance") # Send to database the Ambient temperature
-      
-    if flag_toAzureDB_selection['lightIntensity'] == 'True':
-      message1 = { "lux_luminance": str(lux_luminance) }
-      send_message(token, message1)	
+    #if flag_print_selection['lightIntensity'] == 'True':
+    #  print 'lux_luminance: ',lux_luminance
+    #
+    #if flag_toDB_selection['lightIntensity'] == 'True':
+    #  send_to_DB(lux_luminance, "luminance") # Send to database the Ambient temperature
+    #  
+    #if flag_toAzureDB_selection['lightIntensity'] == 'True':
+    #  message1 = { "lux_luminance": str(lux_luminance) }
+    #  send_message(token, message1)	
 
-    """GETTING THE HUMIDITY"""
-    rel_humidity = hexHum2RelHum(tag.char_read_hnd(0x2C, "humidity"))
+    #"""GETTING THE HUMIDITY"""
+    #rel_humidity = hexHum2RelHum(tag.char_read_hnd(0x2C, "humidity"))
 
-    if flag_print_selection['humidity'] == 'True':
-      print 'humidity: ',rel_humidity
+    #if flag_print_selection['humidity'] == 'True':
+    #  print 'humidity: ',rel_humidity
 
-    if flag_toDB_selection['humidity']== 'True':
-      send_to_DB(rel_humidity, "humidity") # Send to database the Relative Humidity
-    
-    if flag_toAzureDB_selection['humidity'] == 'True':
-      message1 = { "humidity": str(rel_humidity) }
-      send_message(token, message1)	        	
+    #if flag_toDB_selection['humidity']== 'True':
+    #  send_to_DB(rel_humidity, "humidity") # Send to database the Relative Humidity
+    #
+    #if flag_toAzureDB_selection['humidity'] == 'True':
+    #  message1 = { "humidity": str(rel_humidity) }
+    #  send_message(token, message1)	        	
 
-    """GETTING THE Barometric Pressure"""
-    barPressure = hexPress2Press(tag.char_read_hnd(0x34, "barPressure"))
+    #"""GETTING THE Barometric Pressure"""
+    #barPressure = hexPress2Press(tag.char_read_hnd(0x34, "barPressure"))
 
-    if flag_print_selection['pressure'] == 'True':
-      print 'pressure: ',barPressure
-          
-    if flag_toDB_selection['pressure']== 'True':
-      send_to_DB(barPressure, "pressure") # Send to database the Barrometric Pressure in hPa (hectoPascal)
-    
-    if flag_toAzureDB_selection['pressure'] == 'True':
-      message1 = { "pressure": str(barPressure) }
-      send_message(token, message1)	
-      	
-    
-    """GETTING THE Gyroscope"""
-    rawMovementData = tag.char_read_hnd(0x3C,"movementSensor")
-    GyroscopeData = hexGyro2Gyro(rawMovementData)
-    
-    if flag_print_selection['gyroscope'] == 'True':
-      print 'gyroscope: ',GyroscopeData
-      
-    if flag_toAzureDB_selection['gyroscope']  == 'True':
-      message1 = { "dataGyroX": str(GyroscopeData[0]) }      
-      send_message(token, message1)	
-      message2 = { "dataGyroY": str(GyroscopeData[1]) }
-      send_message(token, message2)
-      message3 = { "dataGyroZ": str(GyroscopeData[2]) }
-      send_message(token, message3)
-          
-    """GETTING THE Acceleration"""
-    AccelerationData1 = hexAccel2Accel(rawMovementData)
-    
-    if flag_print_selection['acceleration'] == 'True':
-      print 'acceleration: ',AccelerationData1
-      
-    if flag_toAzureDB_selection['acceleration'] =='True':	
-      message1 = { "acceleration_1X": str(AccelerationData1[0]) }      
-      send_message(token, message1)	
-      message2 = { "acceleration_1Y": str(AccelerationData1[1]) }
-      send_message(token, message2)
-      message3 = { "acceleration_1Z": str(AccelerationData1[2]) }
-      send_message(token, message3)	
-          
-    """GETTING THE Acceleration utiizing library sensortag_calcs.py"""
-    rawX = twos_complement(rawMovementData[12],8)+twos_complement(rawMovementData[13],8)
-    rawY = twos_complement(rawMovementData[14],8)+twos_complement(rawMovementData[15],8)
-    rawZ = twos_complement(rawMovementData[16],8)+twos_complement(rawMovementData[17],8)
-    #AccelerationData2 = calcAccel(rawX, rawY, rawZ)
-    #print 'acceleration_2 & magnitude: ',AccelerationData2
-    
-    """GETTING THE Magnetometer"""
-    MagnetometerData = hexMagneto2Magneto(rawMovementData)
-    
-    if flag_print_selection['magnetometer'] == 'True':
-      print 'magnetometer: ',MagnetometerData
-      
-    if flag_toAzureDB_selection['magnetometer'] =='True':	
-      message1 = { "MagnetometerX": str(MagnetometerData[0]) }      
-      send_message(token, message1)	
-      message2 = { "MagnetometerY": str(MagnetometerData[1]) }
-      send_message(token, message2)
-      message3 = { "MagnetometerZ": str(MagnetometerData[2]) }
-      send_message(token, message3)	
-          
-    """LOOP INTERVAL"""
-    counter = counter+1
-    print (counter)
-    time.sleep(0.0)
+    #if flag_print_selection['pressure'] == 'True':
+    #  print 'pressure: ',barPressure
+    #      
+    #if flag_toDB_selection['pressure']== 'True':
+    #  send_to_DB(barPressure, "pressure") # Send to database the Barrometric Pressure in hPa (hectoPascal)
+    #
+    #if flag_toAzureDB_selection['pressure'] == 'True':
+    #  message1 = { "pressure": str(barPressure) }
+    #  send_message(token, message1)	
+    #  	
+    #
+    #"""GETTING THE Gyroscope"""
+    #rawMovementData = tag.char_read_hnd(0x3C,"movementSensor")
+    #GyroscopeData = hexGyro2Gyro(rawMovementData)
+    #
+    #if flag_print_selection['gyroscope'] == 'True':
+    #  print 'gyroscope: ',GyroscopeData
+    #  
+    #if flag_toAzureDB_selection['gyroscope']  == 'True':
+    #  message1 = { "dataGyroX": str(GyroscopeData[0]) }      
+    #  send_message(token, message1)	
+    #  message2 = { "dataGyroY": str(GyroscopeData[1]) }
+    #  send_message(token, message2)
+    #  message3 = { "dataGyroZ": str(GyroscopeData[2]) }
+    #  send_message(token, message3)
+    #      
+    #"""GETTING THE Acceleration"""
+    #AccelerationData1 = hexAccel2Accel(rawMovementData)
+    #
+    #if flag_print_selection['acceleration'] == 'True':
+    #  print 'acceleration: ',AccelerationData1
+    #  
+    #if flag_toAzureDB_selection['acceleration'] =='True':	
+    #  message1 = { "acceleration_1X": str(AccelerationData1[0]) }      
+    #  send_message(token, message1)	
+    #  message2 = { "acceleration_1Y": str(AccelerationData1[1]) }
+    #  send_message(token, message2)
+    #  message3 = { "acceleration_1Z": str(AccelerationData1[2]) }
+    #  send_message(token, message3)	
+    #      
+    #"""GETTING THE Acceleration utiizing library sensortag_calcs.py"""
+    #rawX = twos_complement(rawMovementData[12],8)+twos_complement(rawMovementData[13],8)
+    #rawY = twos_complement(rawMovementData[14],8)+twos_complement(rawMovementData[15],8)
+    #rawZ = twos_complement(rawMovementData[16],8)+twos_complement(rawMovementData[17],8)
+    ##AccelerationData2 = calcAccel(rawX, rawY, rawZ)
+    ##print 'acceleration_2 & magnitude: ',AccelerationData2
+    #
+    #"""GETTING THE Magnetometer"""
+    #MagnetometerData = hexMagneto2Magneto(rawMovementData)
+    #
+    #if flag_print_selection['magnetometer'] == 'True':
+    #  print 'magnetometer: ',MagnetometerData
+    #  
+    #if flag_toAzureDB_selection['magnetometer'] =='True':	
+    #  message1 = { "MagnetometerX": str(MagnetometerData[0]) }      
+    #  send_message(token, message1)	
+    #  message2 = { "MagnetometerY": str(MagnetometerData[1]) }
+    #  send_message(token, message2)
+    #  message3 = { "MagnetometerZ": str(MagnetometerData[2]) }
+    #  send_message(token, message3)	
+    #      
+    #"""LOOP INTERVAL"""
+    #counter = counter+1
+    #print (counter)
+    #time.sleep(0.0)
 
     
 if __name__ == "__main__":

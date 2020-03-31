@@ -10,7 +10,7 @@ class SensorTag:
   def __init__( self, bluetooth_adr ):
     self.con = pexpect.spawn('gatttool -b ' + bluetooth_adr + ' --interactive')
     self.con.expect('\[LE\]>', timeout=600)
-    print "INFO: Preparing to connect. Hold on a second...If nothing happens please press the power button..."
+    print "INFO: Preparing to connect. Hold on a second...If nothing happens please press the power button...", bluetooth_adr
     self.con.sendline('connect')
     # test for success of connect
     self.con.expect('.*Connection successful.*\[LE\]>')
@@ -37,27 +37,31 @@ class SensorTag:
     return
 
   def char_read_hnd( self, handle, sensortype ):
-    self.con.sendline('char-read-hnd 0x%02x' % handle) #send the hex value to the Tag
-    #print 'DEBUGGING: char-read-hnd 0x%02x' % handle        
-    self.con.expect('.*descriptor:.* \r')
-    reading = self.con.after
-    #print "DEBUGGING: Reading from Tag... %s \n" % reading #print the outcome as it comes while reading the Tag
-    rval = reading.split() #splitting the reading based on the spaces
-    #print "DEBUGGING: rval" + str(rval)
+    raw_measurment = -1
+    try:
+        self.con.sendline('char-read-hnd 0x%02x' % handle) #send the hex value to the Tag
+        #print 'DEBUGGING: char-read-hnd 0x%02x' % handle        
+        self.con.expect('.*descriptor:.* \r')
+        reading = self.con.after
+        #print "DEBUGGING: Reading from Tag... %s \n" % reading #print the outcome as it comes while reading the Tag
+        rval = reading.split() #splitting the reading based on the spaces
+        #print "DEBUGGING: rval" + str(rval)
 
-    if  sensortype in ['temperature']:
-      raw_measurement = rval[-4]+rval[-3]+rval[-2]+rval[-1]
-    elif sensortype in ['luminance']:
-      raw_measurement = rval[-1]+rval[-2]
-    elif sensortype in ['humidity']:
-      raw_measurement = rval[-1]+rval[-2]
-    elif sensortype in ['barPressure']:
-      raw_measurement = rval[-1]+rval[-2]+rval[-3]
-    elif sensortype in ['movementSensor']:
-      raw_measurement = rval   
-    
-    else:
-      raw_measurement = 0
+        if  sensortype in ['temperature']:
+          raw_measurement = rval[-4]+rval[-3]+rval[-2]+rval[-1]
+        elif sensortype in ['luminance']:
+          raw_measurement = rval[-1]+rval[-2]
+        elif sensortype in ['humidity']:
+          raw_measurement = rval[-1]+rval[-2]
+        elif sensortype in ['barPressure']:
+          raw_measurement = rval[-1]+rval[-2]+rval[-3]
+        elif sensortype in ['movementSensor']:
+          raw_measurement = rval   
+        
+        else:
+          raw_measurement = 0
+    except Exception as e:
+        print "ERROR", str(e)
       
     return raw_measurement
                     
