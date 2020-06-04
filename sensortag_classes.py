@@ -14,7 +14,7 @@ class SensorTag:
     self.con.sendline('connect')
     # test for success of connect
     self.con.expect('.*Connection successful.*\[LE\]>')
-    print "INFO: Connection Successful!"
+    print "INFO: Connection Successful! "+bluetooth_adr
     # Earlier versions of gatttool returned a different message.  Use this pattern -
     #self.con.expect('\[CON\].*>')
     self.cb = {}
