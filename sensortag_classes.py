@@ -51,7 +51,7 @@ class SensorTag:
             else:
                 raw_measurement = 0
         except Exception as e:
-            print "ERROR", str(e)
+            print("ERROR", str(e))
 
         return raw_measurement
 
