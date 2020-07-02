@@ -1,12 +1,9 @@
-import copy
-from os.path import join
 from threading import Thread
 import time
 
 from sensortag_classes import SensorTag
 
 SLEEP_TIME = 2
-
 INIT_WAIT = 1
 TIME_BETWEEN_READINGS_IN_SECONDS = 5
 DATA_FILE = "/home/pi/records.txt"
@@ -60,7 +57,7 @@ def hexLum2Lux(raw_luminance):
 
 
 def collect_lux_readings(label, ble_mac):
-    print "start lux reading for :", ble_mac
+    print(ble_mac, "starting collection thread")
     tag = SensorTag(ble_mac)
     tag.char_write_cmd(0x47, 0o1)  # Enable Luminance
     time.sleep(0.5)
@@ -74,7 +71,7 @@ def collect_lux_readings(label, ble_mac):
 
 
 def process_readings():
-    print "processing started"
+    print("starting processing thread")
     while 1:
         current_records_number = len(LUX_READINGS)
         if current_records_number > 0:
@@ -88,11 +85,11 @@ def process_readings():
 
 
 if __name__ == "__main__":
+    start_time = int(time.time())
+    print('init time', start_time)
     for sensor_tag in SENSOR_TAG_LIST:
         Thread(target=collect_lux_readings, args=(sensor_tag["label"], sensor_tag["ble_mac"])).start()
         time.sleep(3)
-    start_time = int(time.time())
-    print('start time', start_time)
     print("going to sleep for seconds", INIT_WAIT)
     time.sleep(INIT_WAIT)
     process_readings()

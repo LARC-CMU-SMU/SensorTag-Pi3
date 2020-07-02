@@ -7,10 +7,10 @@ class SensorTag:
     def __init__(self, bluetooth_adr):
         self.con = pexpect.spawn('gatttool -b ' + bluetooth_adr + ' --interactive')
         self.con.expect('\[LE\]>', timeout=600)
-        print "Connecting to", bluetooth_adr
+        print(bluetooth_adr, "Connecting...")
         self.con.sendline('connect')
         self.con.expect('.*Connection successful.*\[LE\]>')
-        print "Connection Successful!" + bluetooth_adr
+        print(bluetooth_adr, "Connected")
         self.cb = {}
         return
 
@@ -61,13 +61,13 @@ class SensorTag:
             try:
                 pnum = self.con.expect('Notification handle = .*? \r', timeout=4)
             except pexpect.TIMEOUT:
-                print "TIMEOUT exception!"  # was: print "TIMEOUT exception!"
+                print("TIMEOUT exception!") # was: print "TIMEOUT exception!"
                 break
 
             if pnum == 0:
                 after = self.con.after
                 hxstr = after.split()[3:]
-                print "****"
+                print("****")
                 handle = long(float.fromhex(hxstr[0]))
                 self.cb[handle]([long(float.fromhex(n)) for n in hxstr[2:]])
                 pass
