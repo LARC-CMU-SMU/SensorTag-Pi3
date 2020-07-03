@@ -45,14 +45,18 @@ start_time = 0
 
 
 def hexLum2Lux(raw_luminance):
+    luminance = -1
     m = "0FFF"
     e = "F000"
-    raw_luminance = int(raw_luminance, 16)
-    m = int(m, 16)  # Assign initial values as per the CC2650 Optical Sensor Dataset
-    exp = int(e, 16)  # Assign initial values as per the CC2650 Optical Sensor Dataset
-    m = (raw_luminance & m)  # as per the CC2650 Optical Sensor Dataset
-    exp = (raw_luminance & exp) >> 12  # as per the CC2650 Optical Sensor Dataset
-    luminance = (m * 0.01 * pow(2.0, exp))  # as per the CC2650 Optical Sensor Dataset
+    try:
+        raw_luminance = int(raw_luminance, 16)
+        m = int(m, 16)  # Assign initial values as per the CC2650 Optical Sensor Dataset
+        exp = int(e, 16)  # Assign initial values as per the CC2650 Optical Sensor Dataset
+        m = (raw_luminance & m)  # as per the CC2650 Optical Sensor Dataset
+        exp = (raw_luminance & exp) >> 12  # as per the CC2650 Optical Sensor Dataset
+        luminance = (m * 0.01 * pow(2.0, exp))  # as per the CC2650 Optical Sensor Dataset
+    except Exception as e:
+        print("ERROR", str(e))
     return luminance  # returning luminance in lux
 
 

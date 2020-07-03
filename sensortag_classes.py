@@ -49,6 +49,7 @@ class SensorTag:
                 raw_measurement = rval
 
             else:
+                print("unhandles sensor type", sensortype)
                 raw_measurement = 0
         except Exception as e:
             print("ERROR", str(e))
