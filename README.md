@@ -1,4 +1,4 @@
-# discontinued : updated repo - > [](https://github.com/LARC-CMU-SMU/sensortag)
+# discontinued : updated repo - > https://github.com/LARC-CMU-SMU/sensortag
 ## Note : specialized to read the lux values from multiple sensortags, check record_lux_via_sensor_tag.py
 #  TEXAS Instruments SENSOR TAG and Raspberry PI 3 Model B using Bluetooth Low Energy
 	
